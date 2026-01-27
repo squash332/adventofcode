@@ -24,37 +24,75 @@
 
 
 # So, after blinking once, your five stones would become an arrangement of seven stones engraved with the numbers 1 2024 1 0 9 9 2021976.
+from collections import defaultdict
+from functools import cache, reduce
 import math
+import operator
 from time import time
 
-stones = [7568,155731, 0, 972, 1, 6919238, 80646, 22]
+# stones = [125, 17]
+stones = [7568, 155731, 0, 972, 1, 6919238, 80646, 22]
 
-def blink(stones):
-    i = 0
-    while i < len(stones):
-        if stones[i] == 0:
-            stones[i] = stones[i] + 1
-            i += 1
 
-        digit_count = len(str(stones[i]))
-        #digit_count = print("digit count: ", digit_count)
-        if digit_count % 2 == 0:
+# def blink(stones):
+    
+#     i = 0
+#     while i < len(stones): # 0 < 1 ?
+#         if stones[i] == 0:
+#             stones[i] = stones[i] + 1
+#             i += 1
+
+#         digit_count = len(str(stones[i]))
+#         if digit_count % 2 == 0:
+#             exponent = int(digit_count / 2)
+#             second_digit = int(stones[i] % math.pow(10, exponent))
+#             stones.insert(i + 1, second_digit)
+#             stones[i] = int(stones[i] / math.trunc(math.pow(10, digit_count/2)))
+#             i += 2
+
+#         else :
+#             stones[i] *= 2024
+#             i += 1
+#     return stones
+
+blinked = defaultdict(list)
+
+@cache 
+def blink_n(stone, n):
+    if n == 0:
+        return 1
+    # blinked[n].append(stone)
+
+    digit_count = len(str(stone))
+    if stone == 0:
+         return blink_n(1, n-1)
+    
+    if digit_count % 2 == 0:
             exponent = int(digit_count / 2)
-            #print(exponent) = 1
-            #print(stones[i])
-            second_digit = int(stones[i] % math.pow(10, exponent))
-            #print(second_digit)
-            stones.insert(i + 1, second_digit)
-            stones[i] = int(stones[i] / math.trunc(math.pow(10, digit_count/2)))
-            #print(stones)
-            #print(digit_count) 2
-            i += 2
-        else :
-            stones[i] *= 2024
-            i += 1
+            first_stone  = int(stone / math.trunc(math.pow(10, digit_count/2)))
+            second_stone = int(stone % math.pow(10, exponent))
+            return blink_n(first_stone, n-1) + blink_n(second_stone, n-1)
+    
+    return blink_n(stone*2024, n-1)
 
-print(stones)
-j = 0
+    
+print(sum(blink_n(x, 75) for x in stones))
+reduce(operator.add, (blink_n(x, 75) for x in stones), 0)
+# for n in sorted(blinked.keys()):
+#     print(n, blinked[n])
+
+# print(stones)
+
+# blink(stones) #1
+# print("1 time", stones)
+
+# blink(stones) #2
+# print("2 time", stones)
+
+# blink(stones) #3
+# print("3 time", stones)
+
+"""j = 0
 while j < 40:
     pre = time()
     blink(stones)
@@ -63,7 +101,9 @@ while j < 40:
     print(f"{j}: {in_ms}, num stones: {len(stones)}")
     # print("After ", j, "blinks", stones)
     j+=1
-    
+"""
+
+
 
 
 

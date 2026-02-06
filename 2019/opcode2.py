@@ -1,62 +1,103 @@
 from copy import deepcopy
 from pathlib import Path
-from functools import lru_cache
 input_str = Path(__file__).parent / "intcode.txt"
-data = input_str.read_text().strip().splitlines()
+memory = input_str.read_text().strip().splitlines()
 arr = []
 
-for line in data:
+for line in memory:
     for word in line.split(','):
         arr.append(word)
 
 arr = list(map(int, arr))
 
-def opcode_add(data, i):
-    data[data[i+3]] = data[data[i + 1]] + data[data[i + 2]]
 
-def opcode_multiply(data, i):
-    data[data[i+3]] = data[data[i + 1]] * data[data[i + 2]]
+# def get_wanted_output(my_output):
+#     my_output += find_output(0, 0) # 337106
+#     if my_output == wanted_output:
+#         return my_output
+# instruction e.g 1,2,3,4 -> 1 is opcode; 2, 3, 4 parameters
+# 1002, 4, 3, 4, 33
 
-def get_wanted_output(noun, verb, my_output):
-    my_output += find_output(0, 0) # 337106
-    if my_output == wanted_output:
-        return my_output
-    
-    
+def add(memory, i, mode, input, output):
+    a = read_param(memory, i, 1, mode)
+    b = read_param(memory, i, 2, mode)
+    memory[write_addr(memory, i, 3)] = a + b
+    return i + 4
     
 
-def find_output(noun, verb):
-    data = deepcopy(arr)
-    data[1] = noun
-    data[2] = verb
-    program_counter = 0
-    while True:  
-        opcode = data[program_counter]
-        
+def multiply(memory, i, mode, input, output):
+    a = read_param(memory, i, 1, mode)
+    b = read_param(memory, i, 2, mode)
+    memory[write_addr(memory, i, 3)] = a * b
+    return i + 4
+    
+
+def input(memory, i, mode, input, output):
+    memory[write_addr(memory, i, 1)] = input
+    return i + 2
+    
+def output(memory, i, mode, input, output_list):
+    value = memory[read_param(memory, i, 1, 1)]
+    output_list.append(value)
+    return i + 2
+
+def decode(memory, i):
+    decoded_opcode = memory[i] % 100
+    mode = memory[i] // 100
+
+    return decoded_opcode, mode # for 1002, opcode 2, mode 10
+
+def get_mode(mode, param_index): #10
+    return mode // (10 ** param_index) % 10
+
+def read_param(memory, i, offset, mode):
+    param_mode = get_mode(mode, offset - 1)
+    value = memory[i + offset]
+
+    if param_mode == 1: # parameter interpreted as value aka mode 1 POSITION MODE
+        return value
+    else:
+        return memory[value] # IMMEDIATE VALUE
+
+def write_addr(memory, i, offset):
+    return memory[i + offset]
+
+
+OPCODES = {
+    1: add,
+    2: multiply,
+    3: input,
+    4: output
+}
+
+def run_loop(arr, input_instruction):
+    memory = deepcopy(arr)
+    i = 0
+    result = []
+    while True: 
+        opcode, mode = decode(memory, i)
+        # print("opcode", opcode, type(mode))
+        # print("mode", mode, type(mode))
+        # print("getmode:", get_mode(mode, ))
         if opcode == 99:
             break
+        
+        i = OPCODES[opcode](memory, i, mode, input_instruction, result)
 
-        if opcode == 1:
-            opcode_add(data, program_counter)  
+    return result
 
-        if opcode == 2:
-            opcode_multiply(data, program_counter)     
+print(run_loop(arr, 1))
 
-        program_counter += 4
-
-    print("noun:", noun, "verb:", verb)
-    return data[0]
-
-print("Part 1:", find_output(12,2))
+# print("Part 1:", find_output(12,2))
 
 
-wanted_output = 19690720
-for noun in range(100):
-    for verb in range(100):
-        if find_output(noun, verb) == wanted_output:
-            answer = 100 * noun + verb
-            print(f"Part 2: {answer}")
-            exit()
+# wanted_output = 19690720
+# for noun in range(100):
+#     for verb in range(100):
+#         if find_output(noun, verb) == wanted_output:
+#             answer = 100 * noun + verb
+#             print(f"Part 2: {answer}")
+#             exit()
 
 
     # arr[1] = noun
@@ -67,9 +108,9 @@ for noun in range(100):
     #     if number == 99 and i % 4 == 0:
     #         break
     #     elif number == 1 and i % 4 == 0:
-    #         opcode_add(i) 
+    #         add(i) 
     #     elif number == 2 and i % 4 == 0 :
-    #         opcode_multiply(i)  
+    #         multiply(i)  
     # my_output = arr[0]
     # print("noun:", noun, "verb:", verb)   
     # return my_output

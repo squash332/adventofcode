@@ -13,10 +13,7 @@ orbits = input_str.read_text().strip(')').splitlines()
 # 
 # print(orbits)
 PLANETS = set ()
-DIRECT_ORBITS = {
-    0: "COMB",
-
-}
+DIRECT_ORBITS = {}
 INDIRECT_ORBITS = set()
 
 COM = 'COM'
@@ -33,10 +30,10 @@ def total_orbit_count(orbits):
             else:
                 first = orbit[0:(len(orbits[i]) - 1) // 2]
                 second = orbit[-((len(orbits[i]) - 1) // 2)]
-            print(f"i: {i} first: {first}")
-            print(f"u: {i} second: {second}")
+            # print(f"i: {i} first: {first}")
+            # print(f"u: {i} second: {second}")
 
-            DIRECT_ORBITS[i] = first + second
+            DIRECT_ORBITS[second] = first
             PLANETS.add(first)
             PLANETS.add(second) 
 
@@ -44,9 +41,14 @@ def total_orbit_count(orbits):
     print(f"planets: {PLANETS},\norbit sum: {sum}")
     print("direct orbits:", DIRECT_ORBITS)
 
-
+def indirect_orbits():
+    counter = 0
+    for key, value in DIRECT_ORBITS.items():
+        print(key, value)
+         
 # direct orbits is simply length of input
         
-total_orbit_count(orbits)                 
+total_orbit_count(orbits)
+indirect_orbits()                 
 
 

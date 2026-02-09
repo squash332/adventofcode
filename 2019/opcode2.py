@@ -43,6 +43,8 @@ def output(memory, i, mode, input, output_list):
 
 def decode(memory, i):
     decoded_opcode = memory[i] % 100
+    # if decoded_opcode not in OPCODES:
+    #     decoded_opcode %= memory[i]
     mode = memory[i] // 100
 
     return decoded_opcode, mode # for 1002, opcode 2, mode 10
@@ -62,12 +64,53 @@ def read_param(memory, i, offset, mode):
 def write_addr(memory, i, offset):
     return memory[i + offset]
 
+def jump_true(memory, i, mode, input, output):
+    #e.g 1111, 11 opcode (1) -> non zero, params 11 -> sets instruction pointer to 11
+    first = read_param(memory, i, 1, mode)
+    second = read_param(memory, i, 2, mode)
+    if first != 0:
+        i = second
+        return i
+    else:
+        return i + 3
+
+def jump_false(memory, i, mode, input, output):
+    first = read_param(memory, i, 1, mode)
+    second = read_param(memory, i, 2, mode)
+    if first == 0:
+        i = second
+        return i
+    else:
+        return i + 3
+
+def less_than(memory, i, mode, input, output):
+    first = read_param(memory, i, 1, mode)
+    second = read_param(memory, i, 2, mode)
+    if first < second:
+        memory[write_addr(memory, i, 3)] = 1
+    else:
+        memory[write_addr(memory, i, 3)]= 0
+    return i + 4
+
+def equals(memory, i, mode, input, output):
+    first = read_param(memory, i, 1, mode)
+    second = read_param(memory, i, 2, mode)
+    if first == second:
+        memory[write_addr(memory, i, 3)]= 1
+    else:
+        memory[write_addr(memory, i, 3)] = 0
+    return i + 4
+
 
 OPCODES = {
     1: add,
     2: multiply,
     3: input,
-    4: output
+    4: output,
+    5: jump_true,
+    6: jump_false,
+    7: less_than,
+    8: equals
 }
 
 def run_loop(arr, input_instruction):
@@ -81,12 +124,12 @@ def run_loop(arr, input_instruction):
         # print("getmode:", get_mode(mode, ))
         if opcode == 99:
             break
-        
+        print(f"i={i}, instr={memory[i]}, opcode={opcode}, mode={mode}")
         i = OPCODES[opcode](memory, i, mode, input_instruction, result)
 
     return result
 
-print(run_loop(arr, 1))
+print(run_loop(arr, 5))
 
 # print("Part 1:", find_output(12,2))
 

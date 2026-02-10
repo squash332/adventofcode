@@ -42,12 +42,42 @@ def each_planet_orbit(planet, direct_orbits):
 def count_for_planets():
     total_orbits = 0
     for planet in DIRECT_ORBITS:
-        # print("planet:", planet)
         total_orbits += each_planet_orbit(planet, DIRECT_ORBITS)
     print("total orbits:", total_orbits)
-# direct orbits is simply length of input
-# DFS
+
+def distances_from(start, direct_orbits):
+    distance = {}
+    steps = 0
+    current = start
+
+    while current in direct_orbits:
+            distance[current] = steps
+            current = direct_orbits[current]
+            steps += 1
+    return distance
+
+def count_p2_orbits(me, santa, direct_orbits):
+    distance_from_me  = distances_from(me, direct_orbits)
+    current = santa
+    orbits = 0
+
+    while current not in distance_from_me:
+        current = direct_orbits[current]
+        orbits += 1
+    return orbits + distance_from_me[current]
+
 total_orbit_count(orbits)
-count_for_planets()                 
+count_for_planets()
+me = DIRECT_ORBITS["YOU"]  
+santa = DIRECT_ORBITS["SAN"] 
+print(me, santa)
+
+p2_orbits = count_p2_orbits(me, santa, DIRECT_ORBITS)
+
+
+print(f"p2 orbits: {p2_orbits}")
+
+
+
 
 

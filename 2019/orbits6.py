@@ -12,43 +12,42 @@ orbits = input_str.read_text().strip(')').splitlines()
 # no duplicates in sets
 # 
 # print(orbits)
-PLANETS = set ()
 DIRECT_ORBITS = {}
-INDIRECT_ORBITS = set()
 
 COM = 'COM'
 
 def total_orbit_count(orbits):
-    sum = 0
-    current = ''
     for i, orbit in enumerate(orbits): 
-            print(i, orbit)
+            # print(i, orbit, "len(orbits[i]):", len(orbits[i]))
             if COM in orbit:
-                  print("printing COM constant:", COM)
+                #   print("printing COM constant:", COM)
                   first = COM
                   second = orbit[len(first)+1:]
             else:
-                first = orbit[0:(len(orbits[i]) - 1) // 2]
-                second = orbit[-((len(orbits[i]) - 1) // 2)]
-            # print(f"i: {i} first: {first}")
-            # print(f"u: {i} second: {second}")
+                first = orbit[:(len(orbits[i]) - 1) // 2]
+                second = orbit[((len(orbits[i]) - 1) // 2)+1:]
 
-            DIRECT_ORBITS[second] = first
-            PLANETS.add(first)
-            PLANETS.add(second) 
+            DIRECT_ORBITS[second] = first 
 
-    sum += len(PLANETS)
-    print(f"planets: {PLANETS},\norbit sum: {sum}")
-    print("direct orbits:", DIRECT_ORBITS)
+    # print("direct orbits:", DIRECT_ORBITS)
 
-def indirect_orbits():
-    counter = 0
-    for key, value in DIRECT_ORBITS.items():
-        print(key, value)
-         
+def each_planet_orbit(planet, direct_orbits):
+    count = 0
+    while planet in direct_orbits:
+        #   print(f"count_orbits func: planet: {planet}, direct_orbits: {direct_orbits}")
+          planet = direct_orbits[planet]
+          count += 1
+    return count
+
+def count_for_planets():
+    total_orbits = 0
+    for planet in DIRECT_ORBITS:
+        # print("planet:", planet)
+        total_orbits += each_planet_orbit(planet, DIRECT_ORBITS)
+    print("total orbits:", total_orbits)
 # direct orbits is simply length of input
-        
+# DFS
 total_orbit_count(orbits)
-indirect_orbits()                 
+count_for_planets()                 
 
 

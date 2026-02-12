@@ -18,6 +18,7 @@ arr = list(map(int, arr))
 # instruction e.g 1,2,3,4 -> 1 is opcode; 2, 3, 4 parameters
 # 1002, 4, 3, 4, 33
 
+
 def add(memory, i, mode, input, output):
     a = read_param(memory, i, 1, mode)
     b = read_param(memory, i, 2, mode)
@@ -33,7 +34,7 @@ def multiply(memory, i, mode, input, output):
     
 
 def input(memory, i, mode, input, output):
-    memory[write_addr(memory, i, 1)] = input
+    memory[write_addr(memory, i, 1)] = input.pop(0)
     return i + 2
     
 def output(memory, i, mode, input, output_list):
@@ -113,7 +114,7 @@ OPCODES = {
     8: equals
 }
 
-def run_loop(arr, input_instruction):
+def run_loop(arr, inputs):
     memory = deepcopy(arr)
     i = 0
     result = []
@@ -124,12 +125,12 @@ def run_loop(arr, input_instruction):
         # print("getmode:", get_mode(mode, ))
         if opcode == 99:
             break
-        print(f"i={i}, instr={memory[i]}, opcode={opcode}, mode={mode}")
-        i = OPCODES[opcode](memory, i, mode, input_instruction, result)
+        # print(f"i={i}, instr={memory[i]}, opcode={opcode}, mode={mode}")
+        i = OPCODES[opcode](memory, i, mode, inputs, result)
 
     return result
 
-print(run_loop(arr, 5))
+# print(run_loop(arr, 5))
 
 # print("Part 1:", find_output(12,2))
 

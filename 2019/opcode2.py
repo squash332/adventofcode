@@ -1,5 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
+
 input_str = Path(__file__).parent / "intcode.txt"
 memory = input_str.read_text().strip().splitlines()
 arr = []
@@ -9,186 +10,122 @@ for line in memory:
         arr.append(word)
 
 arr = list(map(int, arr))
+class IntCode:
 
+    def __init__(self, memory, i, mode, inputs, result):
+        self.memory = memory
+        self.i = i
+        self.mode = mode
+        self.inputs = inputs
+        self.result = result
 
-# def get_wanted_output(my_output):
-#     my_output += find_output(0, 0) # 337106
-#     if my_output == wanted_output:
-#         return my_output
-# instruction e.g 1,2,3,4 -> 1 is opcode; 2, 3, 4 parameters
-# 1002, 4, 3, 4, 33
+    def add(self):
+        a = self.read_param(1)
+        b = self.read_param(2)
+        self.memory[self.write_addr(3)] = a + b
+        return self.i + 4
+        
 
+    def multiply(self):
+        a = self.read_param(1)
+        b = self.read_param(2)
+        self.memory[self.write_addr(3)] = a * b
+        return self.i + 4
+        
 
-def add(memory, i, mode, input, output):
-    a = read_param(memory, i, 1, mode)
-    b = read_param(memory, i, 2, mode)
-    memory[write_addr(memory, i, 3)] = a + b
-    return i + 4
-    
+    def input(self):
+        self.memory[self.write_addr(1)] = self.inputs.pop(0)
+        return self.i + 2
+        
+    def output(self):
+        value = self.read_param(1)
+        self.result.append(value)
+        return self.i + 2
 
-def multiply(memory, i, mode, input, output):
-    a = read_param(memory, i, 1, mode)
-    b = read_param(memory, i, 2, mode)
-    memory[write_addr(memory, i, 3)] = a * b
-    return i + 4
-    
+    def decode(self):
+        decoded_opcode = self.memory[self.i] % 100
+        mode = self.memory[self.i] // 100
 
-def input(memory, i, mode, input, output):
-    memory[write_addr(memory, i, 1)] = input.pop(0)
-    return i + 2
-    
-def output(memory, i, mode, input, output_list):
-    value = memory[read_param(memory, i, 1, 1)]
-    output_list.append(value)
-    return i + 2
+        return decoded_opcode, mode 
 
-def decode(memory, i):
-    decoded_opcode = memory[i] % 100
-    # if decoded_opcode not in OPCODES:
-    #     decoded_opcode %= memory[i]
-    mode = memory[i] // 100
+    def get_mode(self, param_index): 
+        return self.mode // (10 ** param_index) % 10
+         
 
-    return decoded_opcode, mode # for 1002, opcode 2, mode 10
+    def read_param(self, offset):
+        param_mode = self.get_mode(offset - 1)
+        value = self.memory[self.i + offset]
 
-def get_mode(mode, param_index): #10
-    return mode // (10 ** param_index) % 10
+        if param_mode == 1: # parameter interpreted as value aka mode 1 POSITION MODE
+            return value
+        else:
+            return self.memory[value] # IMMEDIATE VALUE
 
-def read_param(memory, i, offset, mode):
-    param_mode = get_mode(mode, offset - 1)
-    value = memory[i + offset]
+    def write_addr(self, offset):
+        return self.memory[self.i + offset]
 
-    if param_mode == 1: # parameter interpreted as value aka mode 1 POSITION MODE
-        return value
-    else:
-        return memory[value] # IMMEDIATE VALUE
+    def jump_true(self):
+        first = self.read_param(1)
+        second = self.read_param(2)
+        if first != 0:
+            self.i = second
+            return self.i
+        else:
+            return self.i + 3
 
-def write_addr(memory, i, offset):
-    return memory[i + offset]
+    def jump_false(self):
+        first = self.read_param(1)
+        second = self.read_param(2)
+        if first == 0:
+            self.i = second
+            return self.i
+        else:
+            return self.i + 3
 
-def jump_true(memory, i, mode, input, output):
-    #e.g 1111, 11 opcode (1) -> non zero, params 11 -> sets instruction pointer to 11
-    first = read_param(memory, i, 1, mode)
-    second = read_param(memory, i, 2, mode)
-    if first != 0:
-        i = second
-        return i
-    else:
-        return i + 3
+    def less_than(self):
+        first = self.read_param(1)
+        second = self.read_param(2)
+        if first < second:
+            self.memory[self.write_addr(3)] = 1
+        else:
+            self.memory[self.write_addr(3)]= 0
+        return self.i + 4
 
-def jump_false(memory, i, mode, input, output):
-    first = read_param(memory, i, 1, mode)
-    second = read_param(memory, i, 2, mode)
-    if first == 0:
-        i = second
-        return i
-    else:
-        return i + 3
-
-def less_than(memory, i, mode, input, output):
-    first = read_param(memory, i, 1, mode)
-    second = read_param(memory, i, 2, mode)
-    if first < second:
-        memory[write_addr(memory, i, 3)] = 1
-    else:
-        memory[write_addr(memory, i, 3)]= 0
-    return i + 4
-
-def equals(memory, i, mode, input, output):
-    first = read_param(memory, i, 1, mode)
-    second = read_param(memory, i, 2, mode)
-    if first == second:
-        memory[write_addr(memory, i, 3)]= 1
-    else:
-        memory[write_addr(memory, i, 3)] = 0
-    return i + 4
+    def equals(self):
+        first = self.read_param(1)
+        second = self.read_param(2)
+        if first == second:
+            self.memory[self.write_addr(3)]= 1
+        else:
+            self.memory[self.write_addr(3)] = 0
+        return self.i + 4
 
 
 OPCODES = {
-    1: add,
-    2: multiply,
-    3: input,
-    4: output,
-    5: jump_true,
-    6: jump_false,
-    7: less_than,
-    8: equals
+    1: IntCode.add,
+    2: IntCode.multiply,
+    3: IntCode.input,
+    4: IntCode.output,
+    5: IntCode.jump_true,
+    6: IntCode.jump_false,
+    7: IntCode.less_than,
+    8: IntCode.equals
 }
 
-def run_loop(arr, inputs):
+def run_program(arr, inputs):
     memory = deepcopy(arr)
-    i = 0
-    result = []
+    intcode = IntCode(memory, 0, 0, inputs, [])
+
     while True: 
-        opcode, mode = decode(memory, i)
-        # print("opcode", opcode, type(mode))
-        # print("mode", mode, type(mode))
-        # print("getmode:", get_mode(mode, ))
+        opcode, mode = intcode.decode()
+        intcode.mode = mode
         if opcode == 99:
             break
-        # print(f"i={i}, instr={memory[i]}, opcode={opcode}, mode={mode}")
-        i = OPCODES[opcode](memory, i, mode, inputs, result)
+        intcode.i = OPCODES[opcode](intcode)
 
-    return result
+    return intcode.result
 
-# print(run_loop(arr, 5))
-
-# print("Part 1:", find_output(12,2))
+# print(run_program(arr, [5]))
 
 
-# wanted_output = 19690720
-# for noun in range(100):
-#     for verb in range(100):
-#         if find_output(noun, verb) == wanted_output:
-#             answer = 100 * noun + verb
-#             print(f"Part 2: {answer}")
-#             exit()
-
-
-    # arr[1] = noun
-    # arr[2] = verb
-    # for i, number in enumerate(arr):
-    #     #print(i, number)
-    #     result = 0
-    #     if number == 99 and i % 4 == 0:
-    #         break
-    #     elif number == 1 and i % 4 == 0:
-    #         add(i) 
-    #     elif number == 2 and i % 4 == 0 :
-    #         multiply(i)  
-    # my_output = arr[0]
-    # print("noun:", noun, "verb:", verb)   
-    # return my_output
-
-#print("the answer is:", get_wanted_output(12,2, find_output(12,2)))
-
-
-#print(f"the output is: {find_output(12,2)}, with the noun {noun} and verb {verb}")
-#print(f"answer for part 2 is {answer}")
-
-
-# pt2 
-# determine inputs that produce output 19690720
-# inputs are provided by 
-
-
-
-
-# 1,9,10,3,     1,9,10,70,
-# 2,3,11,0,
-# 99,
-# 30,40,50
-# EXAMPLE -> 1 represents (1, addition), 9 & 10 positions of inputs, 3 position of output
-# (1, addition) arr[3] = arr[8] + arr[9]
-
-# forward 4 steps -> (2, multiplication) arr[0] = arr[3] * arr[11]
-# 
-
-# opcode - value at position 0 which indicates what to do (1, 2 or 99) 
-# 99 means program is finished and should halt
-# encountering a different opcode means something went wrong
-
-# if the opcode is 1, the next 2 positions add up and overwrite the number at 3rd position
-# opcode 2 works exactly like 1, it just multiplies
-
-# when done with an opcode, move forward 4 steps
 

@@ -13,19 +13,20 @@ import opcode2 as op
 from opcode2 import arr
 from itertools import permutations
 
-class Amplifier():
+class Amplifier(op.IntCode):
     def __init__(self, program, phase):
         self.memory = deepcopy(program)
         self.i = 0
         self.inputs = [phase]
         self.halted = False
+        self.result = []
     
     def __call__(self, signal):
         self.inputs.append(signal)
 
-        output_list = []
         while True:
-            opcode, mode = op.decode(self.memory, self.i)
+            opcode, mode = self.decode()
+            self.mode = mode
 
             if opcode == 99:
                 self.halted = True  
@@ -34,10 +35,10 @@ class Amplifier():
             if opcode == 3 and not self.inputs:
                 return 
             
-            self.i = op.OPCODES[opcode](self.memory, self.i, mode, self.inputs, output_list)
+            self.i = op.OPCODES[opcode](self)
             
             if opcode == 4:
-                return output_list[-1]
+                return self.result[-1]
 
 def feedback_loop(program, phase):
     amps = [Amplifier(program, p) for p in phase] 
@@ -56,7 +57,7 @@ def feedback_loop(program, phase):
 def run_phase(phase):
     output = 0
     for num in phase:
-        outputs = op.run_loop(arr, inputs=[num, output])
+        outputs = op.run_program(arr, inputs=[num, output])
         # print(f"output: {output}, num: {num}, outputs: {outputs}")
         output = outputs[-1]
     return output

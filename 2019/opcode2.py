@@ -1,3 +1,4 @@
+from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 
@@ -18,6 +19,8 @@ class IntCode:
         self.mode = mode
         self.inputs = inputs
         self.result = result
+        self.relative_base = 0
+        self.extended = []
 
     def add(self):
         a = self.read_param(1)
@@ -53,16 +56,27 @@ class IntCode:
          
 
     def read_param(self, offset):
+        # print("printing offset:", offset)
         param_mode = self.get_mode(offset - 1)
         value = self.memory[self.i + offset]
+        # print(f"param_mode {param_mode}, offset {offset}, value {value}, self.i {self.i} ")
 
         if param_mode == 1: # parameter interpreted as value aka mode 1 POSITION MODE
             return value
+        elif param_mode == 2: # relative mode
+            # print("printing the return from param_mode 2:", self.memory[self.relative_base])
+            return self.memory[self.relative_base + value]
         else:
             return self.memory[value] # IMMEDIATE VALUE
 
     def write_addr(self, offset):
-        return self.memory[self.i + offset]
+        param_mode = self.get_mode(offset - 1)
+        value = self.memory[self.i + offset]
+        if param_mode == 0: #pos
+            return value
+        elif param_mode == 2: #rel
+            return self.relative_base + value
+
 
     def jump_true(self):
         first = self.read_param(1)
@@ -99,6 +113,13 @@ class IntCode:
         else:
             self.memory[self.write_addr(3)] = 0
         return self.i + 4
+    
+    def relative_base_offset(self):
+        first = self.read_param(1)
+        self.relative_base += first
+        # print(f"relative base: {self.relative_base}")
+
+        return self.i + 2
 
 
 OPCODES = {
@@ -109,13 +130,14 @@ OPCODES = {
     5: IntCode.jump_true,
     6: IntCode.jump_false,
     7: IntCode.less_than,
-    8: IntCode.equals
+    8: IntCode.equals,
+    9: IntCode.relative_base_offset
 }
 
 def run_program(arr, inputs):
-    memory = deepcopy(arr)
-    intcode = IntCode(memory, 0, 0, inputs, [])
 
+
+    intcode = IntCode(deepcopy(arr), 0, 0, inputs, [])
     while True: 
         opcode, mode = intcode.decode()
         intcode.mode = mode
@@ -125,7 +147,7 @@ def run_program(arr, inputs):
 
     return intcode.result
 
-# print(run_program(arr, [5]))
+print(run_program(arr, [2]))
 
 
 

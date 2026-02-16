@@ -32,6 +32,12 @@ class IntCode:
     def multiply(self):
         a = self.read_param(1)
         b = self.read_param(2)
+        # print("printing rel_base", self.relative_base)
+        # print("printing extended", self.extended)
+        # print("printing a*b", a*b)
+        test = [a*b]
+        self.memory.extend(test)
+        # print(f"self memory {self.memory}")
         self.memory[self.write_addr(3)] = a * b
         return self.i + 4
         
@@ -73,8 +79,12 @@ class IntCode:
         param_mode = self.get_mode(offset - 1)
         value = self.memory[self.i + offset]
         if param_mode == 0: #pos
+            # print(f" param mode 0 value: {value}")
+            self.memory += ([0] * value)
             return value
         elif param_mode == 2: #rel
+            # print(f"elif self.rel_base: {self.relative_base}")
+            # print(f"elif value : {value}")
             return self.relative_base + value
 
 

@@ -9,7 +9,7 @@ from dataclasses import astuple, dataclass, fields
 input_str = Path(__file__).parent / "input.txt"
 data = input_str.read_text().strip().splitlines()
 
-print(data)
+# print(data)
 
 @dataclass(frozen=True)
 class Point:
@@ -35,29 +35,21 @@ def find_best_planet(asteroid, asteroids):
         gcd = math.gcd(x,y)
         x //= gcd
         y //= gcd
-        # if asteroid == Point(3,4):
-        #     print(f"asteroid: {asteroid}, other: {other}, x: {x}, y: {y}, gcd: {gcd} ")
         counter.add((x,y))
     return len(counter)
 
+def vaporize_asteroids():
+    return
+
 highest = 0
-
-for asteroid in asteroids:
-    result = find_best_planet(asteroid, asteroids)
-    # print("result: ", result)
-    highest = max(highest, result)
-
-print(highest)
+result = {}
+for i, asteroid in enumerate(asteroids):
+    result[asteroid] = find_best_planet(asteroid, asteroids)
 
 
-# print(counter)     
-        
-
-    
-        
-
-
-    # print(f"asteroid: {selected} location with {} ")
+best_asteroid = max(result, key=result.get)
+best_value = max(result.values())
+print(f" ({best_asteroid.y},{best_asteroid.x}), detected asteroids: {best_value}")
 
 
 

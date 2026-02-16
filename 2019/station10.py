@@ -24,10 +24,9 @@ for r, line in enumerate(data):
             asteroids.add(Point(r, c))
 
 
-highest = 0
+def find_best_planet(asteroid, asteroids):
+    counter = set ()
 
-for asteroid in asteroids:
-    counter = set()
     for other in asteroids:
         if other == asteroid:
             continue
@@ -39,11 +38,19 @@ for asteroid in asteroids:
         # if asteroid == Point(3,4):
         #     print(f"asteroid: {asteroid}, other: {other}, x: {x}, y: {y}, gcd: {gcd} ")
         counter.add((x,y))
+    return len(counter)
 
-    print(f"asteroid: {asteroid}, detectable asteroids: {len((counter))}")
-    highest = max(highest, len(counter))
+highest = 0
+
+for asteroid in asteroids:
+    result = find_best_planet(asteroid, asteroids)
+    # print("result: ", result)
+    highest = max(highest, result)
+
+print(highest)
+
+
 # print(counter)     
-print(f"highest num of detectable asteroids: {highest}" )
         
 
     

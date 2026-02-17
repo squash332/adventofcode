@@ -13,15 +13,31 @@ for line in memory:
 arr = list(map(int, arr))
 class IntCode:
 
-    def __init__(self, memory, i, mode, inputs, result):
+    def __init__(self, memory, i=0, mode=0, inputs=None, result=None):
         self.memory = memory
         self.i = i
         self.mode = mode
-        self.inputs = inputs
-        self.result = result
+        self.inputs = inputs if inputs is not None else []
+        self.result = result if result is not None else []
         self.relative_base = 0
         self.extended = []
+        self.halted = False
 
+    def run(self):
+        while True:
+            opcode, mode = self.decode()
+            self.mode = mode
+            if opcode == 99:
+                print("current opcode is 99, halting program...")
+                return True
+            
+            self.i = OPCODES[opcode](self)
+
+            if opcode == 4:
+                return False
+            
+            
+    
     def add(self):
         a = self.read_param(1)
         b = self.read_param(2)
@@ -73,6 +89,7 @@ class IntCode:
             # print("printing the return from param_mode 2:", self.memory[self.relative_base])
             return self.memory[self.relative_base + value]
         else:
+            self.memory += ([0] * value)
             return self.memory[value] # IMMEDIATE VALUE
 
     def write_addr(self, offset):
@@ -146,7 +163,6 @@ OPCODES = {
 
 def run_program(arr, inputs):
 
-
     intcode = IntCode(deepcopy(arr), 0, 0, inputs, [])
     while True: 
         opcode, mode = intcode.decode()
@@ -157,7 +173,7 @@ def run_program(arr, inputs):
 
     return intcode.result
 
-print(run_program(arr, [2]))
+# print(run_program(arr, []))
 
 
 

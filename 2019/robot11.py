@@ -27,42 +27,60 @@ class Position:
     def __add__(self, other: "Position") -> "Position":
         return Position(self.x + other.x, self.y + other.y)
 
-panels = defaultdict(int)
-visited_locations = set ()
+
 DIRECTIONS = [Position(-1, 0), Position(0, 1), Position(1, 0), Position(0, -1)] # 0,1,2,3, UP, RIGHT, DOWN, LEFT
-direction = 0
 computer = op.IntCode(arr)
-position = Position(0,0)
-# panels[robot] = color 1st output paint 2nd output turn direction then move forwards
+panels = defaultdict(lambda:0)
 
-counter = 0
-while True:
-    color = panels[position]
-    computer.inputs.append(color)
-    visited_locations.add(position)
+def start_painting():
+    direction = 0
+    position = Position(0,0)
+    panels[position] = 1
+    print(panels)
+    while True:
+        color = panels[position]
 
-    if computer.run():
-        break
-    # if(len(computer.result) == 0):
-    #     break
-    paint = computer.result.pop()
-    counter += 1
+        computer.inputs.append(color)
+        if computer.run():
+            break
 
-    computer.run()
-    # if(len(computer.result) == 0):
-    #     break
-    turn = computer.result.pop()
+        paint = computer.result.pop()
+        computer.run()
+        turn = computer.result.pop()
 
+        panels[position] = paint
+        
+        if turn == 0:
+            direction = (direction -1) % 4
+        else:
+            direction = (direction +1) % 4
+        position = position + DIRECTIONS[direction]
+    return len(panels)
     
 
-    panels[position] = paint
-    if turn == 0:
-        direction = (direction -1) % 4
-    else:
-        direction = (direction +1) % 4
-    position = position + DIRECTIONS[direction]
+# result = start_painting()
+# for k,v in panels.items():
+#         print(k,v)
+# print(result)
 
-print(len(visited_locations))
+
+#p2
+
+test = panels.get(Position(4, 39))
+print("*************************", test)
+
+registration_identifier = [[' ']*45 for i in range(6)]
+for row in range(6):
+    for col in range(45):
+        if panels.get(Position(row, col)) == 1:
+            registration_identifier[row][col] = 'I'
+        else:
+            registration_identifier[row][col] = '.'
+
+for row in registration_identifier:
+    print(''.join(row))
+
+
 
 
 

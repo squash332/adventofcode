@@ -1,38 +1,47 @@
 import opcode2 as op
 from opcode2 import arr
-from enum import Enum
-from dataclasses import dataclass
+from collections import defaultdict
 
-@dataclass 
-class Position:
-    x: int
-    y: int
+P = defaultdict(int)
 
-    def __add__(self, other: "Position") -> "Position":
-        return Position(self.x + other.x, self.y + other.y)
-    
-DIRECTIONS = [Position(-1, 1), # top left 
-              Position(1, 1),  # top right
-              Position(-1, -1),  # bottom left
-              Position(1, -1)] # bottom right
+def play():
+    row = sorted([r for r,c in P])
+    col = sorted([c for r,c in P])
 
-TILES = {
-    
-}
+    for r in range(row[0], row[-1]+1):
+        for c in range(col[0], col[-1]+1):
+            print(P[(r,c)], end='')
+        print()
+    return
 
-computer = op.IntCode(arr)
+computer = op.IntCode(arr, [2])
 counter = 0
+
 while True:
     computer.run()
-    computer.result.pop(0)
-    computer.run()
-    computer.result.pop(0)
-    computer.run()
+    # print("comp result 1", computer.result)
+    # print("comp result 1", computer.result[0])
+    a = computer.result.pop(0)
 
-    block_id = computer.result.pop(0)
-    if block_id == 2:
+    computer.run()
+    # print("comp result 2", computer.result[0])
+    b = computer.result.pop(0)
+
+    computer.run()
+    # print("comp result 3", computer.result)
+    # print("comp result 3", computer.result[0])
+    c = computer.result.pop(0)
+    
+    P[(b,a)] = c
+    # print(a,b,c)
+    if c== 2:
         counter += 1
 
     if computer.run():
         break
-print("printing results:", counter)
+
+play()
+# for k,v in P.items():
+#         print(k,v)
+
+# print("part 1:", counter)

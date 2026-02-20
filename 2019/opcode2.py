@@ -33,7 +33,7 @@ class IntCode:
 
             if opcode == 4 :
                 return self.result
-    
+ 
     def add(self):
         a = self.read_param(1)
         b = self.read_param(2)
@@ -47,7 +47,7 @@ class IntCode:
         self.memory[self.write_addr(3)] = a * b
         return self.i + 4
         
-    def input(self):
+    def op_input(self):
         inputs = self.inputs()
         self.memory[self.write_addr(1)] = inputs
         return self.i + 2
@@ -141,7 +141,7 @@ class IntCode:
 OPCODES = {
     1: IntCode.add,
     2: IntCode.multiply,
-    3: IntCode.input,
+    3: IntCode.op_input,
     4: IntCode.output,
     5: IntCode.jump_true,
     6: IntCode.jump_false,

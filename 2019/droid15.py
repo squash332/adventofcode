@@ -35,12 +35,12 @@ DIRECTIONS = {
     4: Point(1, 0)    # east
     } 
 
-
 position = Point(0,0)
 map_grid = {} # (0,0) = je D
 
 while True:
     reply = computer.run()
+    print("CHOSEN NUMBER:", computer.inputs())
     print("REPLY: ", reply)
     # paint(reply)
     

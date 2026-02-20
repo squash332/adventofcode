@@ -8,40 +8,60 @@ def play():
     row = sorted([r for r,c in P])
     col = sorted([c for r,c in P])
 
-    for r in range(row[0], row[-1]+1):
-        for c in range(col[0], col[-1]+1):
-            print(P[(r,c)], end='')
-        print()
-    return
+    for k,v in P.items():
+        if v == 3:
+            paddle = k
+        if v == 4:
+            ball = k
+    
+    # for r in range(row[0], row[-1]+1):
+    #     for c in range(col[0], col[-1]+1):
+    #         match P[(r,c)]:
+    #             case 0:
+    #                 print(" ", end='')
+    #             case 1:
+    #                 print("|", end='')
+    #             case 2:
+    #                 print("#", end='')
+    #             case 3:
+    #                 print("_", end='')
+    #             case 4:
+    #                 print("o", end='')
+        # print()
+    
+    if ball[1] < paddle[1]:
+        return -1
+    elif ball[1] > paddle[1]:
+        return 1
+    else:
+        return 0
 
-computer = op.IntCode(arr, [2])
+computer = op.IntCode(arr, play)
 counter = 0
+computer.memory[0] = 2
+previous_score = None
 
 while True:
     computer.run()
-    # print("comp result 1", computer.result)
-    # print("comp result 1", computer.result[0])
-    a = computer.result.pop(0)
+    if computer.result:
+        a = computer.result.pop(0)
 
     computer.run()
-    # print("comp result 2", computer.result[0])
-    b = computer.result.pop(0)
+    if computer.result:
+        b = computer.result.pop(0)
 
     computer.run()
-    # print("comp result 3", computer.result)
-    # print("comp result 3", computer.result[0])
-    c = computer.result.pop(0)
+    if computer.result:
+        c = computer.result.pop(0)
     
     P[(b,a)] = c
-    # print(a,b,c)
     if c== 2:
         counter += 1
+    if a == -1 and b == 0 :
+        current_score= c
 
-    if computer.run():
-        break
-
-play()
-# for k,v in P.items():
-#         print(k,v)
-
+        if current_score == previous_score:
+            print("Final score", current_score)
+            break
+        previous_score = current_score
 # print("part 1:", counter)

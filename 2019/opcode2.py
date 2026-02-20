@@ -13,11 +13,11 @@ for line in memory:
 arr = list(map(int, arr))
 class IntCode:
 
-    def __init__(self, memory, inputs=None, i=0, mode=0,result=None):
+    def __init__(self, memory, inputs, i=0, mode=0,result=None):
         self.memory = memory
         self.i = i
         self.mode = 0
-        self.inputs = inputs if inputs is not None else []
+        self.inputs = inputs 
         self.result = result if result is not None else []
         self.relative_base = 0
         self.extended = []
@@ -45,15 +45,12 @@ class IntCode:
     def multiply(self):
         a = self.read_param(1)
         b = self.read_param(2)
-        test = [a*b]
-        self.memory.extend(test)
         self.memory[self.write_addr(3)] = a * b
         return self.i + 4
         
-
     def input(self):
-        print("self.inputs", self.inputs)
-        self.memory[self.write_addr(1)] = self.inputs.pop(0)
+        inputs = self.inputs()
+        self.memory[self.write_addr(1)] = inputs
         return self.i + 2
         
     def output(self):
@@ -89,7 +86,6 @@ class IntCode:
     def write_addr(self, offset):
         param_mode = self.get_mode(offset - 1)
         value = self.memory[self.i + offset]
-        print("value", value, "param mode", param_mode)
         if param_mode == 0: #pos
             # print(f" param mode 0 value: {value}")
             self.memory += ([0] * value)

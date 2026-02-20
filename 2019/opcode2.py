@@ -1,5 +1,3 @@
-from collections import defaultdict
-from copy import deepcopy
 from pathlib import Path
 
 input_str = Path(__file__).parent / "intcode.txt"
@@ -18,7 +16,7 @@ class IntCode:
         self.i = i
         self.mode = 0
         self.inputs = inputs 
-        self.result = result if result is not None else []
+        self.result = None
         self.relative_base = 0
         self.extended = []
         self.halted = False
@@ -28,12 +26,13 @@ class IntCode:
             opcode, mode = self.decode()
             self.mode = mode
             if opcode == 99:
-                return True
+                self.halted = True
+                return None
             
             self.i = OPCODES[opcode](self)
 
-            if opcode == 4:
-                return False
+            if opcode == 4 :
+                return self.result
     
     def add(self):
         a = self.read_param(1)
@@ -54,8 +53,7 @@ class IntCode:
         return self.i + 2
         
     def output(self):
-        value = self.read_param(1)
-        self.result.append(value)
+        self.result = self.read_param(1)
         return self.i + 2
 
     def decode(self):
@@ -152,19 +150,6 @@ OPCODES = {
     9: IntCode.relative_base_offset
 }
 
-def run_program(arr, inputs):
-
-    intcode = IntCode(deepcopy(arr), 0, 0, inputs, [])
-    while True: 
-        opcode, mode = intcode.decode()
-        intcode.mode = mode
-        if opcode == 99:
-            break
-        intcode.i = OPCODES[opcode](intcode)
-
-    return intcode.result
-
-# print(run_program(arr, []))
 
 
 

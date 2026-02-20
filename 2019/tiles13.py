@@ -39,29 +39,23 @@ def play():
 computer = op.IntCode(arr, play)
 counter = 0
 computer.memory[0] = 2
-previous_score = None
+previous_score = -1
 
-while True:
-    computer.run()
-    if computer.result:
-        a = computer.result.pop(0)
+while True: 
+    a = computer.run()
 
-    computer.run()
-    if computer.result:
-        b = computer.result.pop(0)
+    b = computer.run()
 
-    computer.run()
-    if computer.result:
-        c = computer.result.pop(0)
+    c = computer.run()
     
+    if a is None: break
     P[(b,a)] = c
+
     if c== 2:
         counter += 1
+    
     if a == -1 and b == 0 :
-        current_score= c
+        print("score", c)
 
-        if current_score == previous_score:
-            print("Final score", current_score)
-            break
-        previous_score = current_score
+
 # print("part 1:", counter)

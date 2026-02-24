@@ -1,4 +1,9 @@
+
+from collections import defaultdict
 from pathlib import Path
+from copy import copy
+
+
 
 input_str = Path(__file__).parent / "intcode.txt"
 memory = input_str.read_text().strip().splitlines()
@@ -12,9 +17,11 @@ arr = list(map(int, arr))
 class IntCode:
 
     def __init__(self, memory, inputs, i=0, mode=0,result=None):
-        self.memory = memory
+        self.memory = defaultdict(int)
+        for address, value in enumerate(memory):
+            self.memory[address] = value
         self.i = i
-        self.mode = 0
+        self.mode = mode
         self.inputs = inputs 
         self.result = None
         self.relative_base = 0
@@ -30,10 +37,21 @@ class IntCode:
                 return None
             
             self.i = OPCODES[opcode](self)
-
             if opcode == 4 :
                 return self.result
- 
+    
+    def clone(self, inputs):
+        new = IntCode({}, inputs)
+
+        new.memory = self.memory.copy() 
+        new.i = self.i
+        new.mode = self.mode
+        new.result = self.result
+        new.relative_base = self.relative_base
+        new.halted = self.halted
+
+        return new
+
     def add(self):
         a = self.read_param(1)
         b = self.read_param(2)
@@ -48,6 +66,7 @@ class IntCode:
         return self.i + 4
         
     def op_input(self):
+        # print("OPCODE 3 CALLED")
         inputs = self.inputs()
         self.memory[self.write_addr(1)] = inputs
         return self.i + 2
@@ -78,7 +97,7 @@ class IntCode:
             # print("printing the return from param_mode 2:", self.memory[self.relative_base])
             return self.memory[self.relative_base + value]
         else:
-            self.memory += ([0] * value)
+            # self.memory += ([0] * value)
             return self.memory[value] # IMMEDIATE VALUE
 
     def write_addr(self, offset):
@@ -86,7 +105,7 @@ class IntCode:
         value = self.memory[self.i + offset]
         if param_mode == 0: #pos
             # print(f" param mode 0 value: {value}")
-            self.memory += ([0] * value)
+            # self.memory += ([0] * value)
             return value
         elif param_mode == 2: #rel
             # print(f"elif self.rel_base: {self.relative_base}")

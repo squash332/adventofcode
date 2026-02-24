@@ -22,11 +22,10 @@ class MovementFunction:
     def __call__(self):
         return self.last_direction
 def bfs():
-    part1 = None
     computer = op.IntCode(arr, MovementFunction())
     position = Point(0,0)
     queue = deque([(position, computer, 0)])
-    visited = {Point(0,0):0}
+    visited = {}
     while queue:
         position, computer_state, dist = queue.popleft()
         # print(position)
@@ -49,17 +48,42 @@ def bfs():
             visited[next_position] = new_dist
 
             if robot_answer == OXYGEN:
-                print("found oxygen:", next_position)
-                return new_dist
+                oxygen_position = next_position
+                print("part 1:", new_dist) # previously, the return was here and that made BFS stop and not explore the whole "map"
+                                           # our exit from the while loop is now the end of BFS (if correclty implemented -> queue always ends empty)
+                
         
             # print(visited)
             # print(computer.memory)
             queue.append((next_position, new_computer, new_dist))
-    return part1
+    return oxygen_position, visited
 
 
 def oxygen_fill_time():
-    print("part 1:", bfs())
+    oxygen_position, visited = bfs()
+    max_time = 0
+    # print(visited)
+    # print(distance, oxygen_position)
+    queue = deque ([(oxygen_position, 0)])
+    seen = {oxygen_position}
+    # print(queue)
+    while queue:
+        position, length = queue.popleft()
+        max_time = max(max_time, length) 
+
+        for direction in [1,2,3,4]:
+            next_position = position + DIRECTIONS[direction]
+
+            if next_position in visited and next_position not in seen:
+                seen.add(next_position)
+                queue.append((next_position, length +1 ))
+        # print(queue)
+    print("part 2:", max_time)
+    return max_time  
+
+
+
+
 
 DIRECTIONS = {
     1: Point(0, 1),   # north

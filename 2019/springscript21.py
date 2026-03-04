@@ -8,13 +8,17 @@ from opcode2 import arr
 # A B C D E F G H I
 # 1 2 3 4 5 6 7 8 9
 springscript = ( # t, j false
-"NOT A J\n" # 
-"NOT B T\n" # j je true 2 mjesto ispred pod
-"OR T J\n"
-"NOT C T\n"
-"OR T J\n"
-"AND D J\n"
-"RUN\n")
+"NOT A J\n" # if hole 1 tile ahead, prepare to jmp
+"NOT B T\n" # 
+"OR T J\n"  # if hole 2 steps ahead, consider jmp
+"NOT C T\n" #
+"OR T J\n"  # if hole three steps ahead, consider jmp
+"AND D J\n" # only jmp if landing is ground
+"NOT E T\n" # e hole?
+"NOT T T\n" # t now true if E is ground
+"OR H T\n"  # T true if E ground or H ground
+"AND T J\n" # jump if landing on D doesnt kill me
+"RUN\n")    # J true if any of a,b,c is hole and D is ground
 
 input_queue = list("".join(springscript))
 def input_func():

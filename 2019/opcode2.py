@@ -22,7 +22,7 @@ class IntCode:
             self.memory[address] = value
         self.i = i
         self.mode = mode
-        self.inputs = inputs 
+        self.inputs = inputs
         self.result = None
         self.relative_base = 0
         self.extended = []
@@ -37,8 +37,14 @@ class IntCode:
                 return None
             
             self.i = OPCODES[opcode](self)
-            if opcode == 4 :
+            if opcode == 4:
                 return self.result
+            
+            if opcode == 3:
+                if not self.inputs:
+                    return None
+
+
     
     def clone(self, inputs):
         new = IntCode({}, inputs)
@@ -67,8 +73,10 @@ class IntCode:
         
     def op_input(self):
         # print("OPCODE 3 CALLED")
-        inputs = self.inputs()
-        self.memory[self.write_addr(1)] = inputs
+        if not self.inputs:
+            self.memory[self.write_addr(1)] = -1
+        else:
+            self.memory[self.write_addr(1)] = self.inputs.pop(0)
         return self.i + 2
         
     def output(self):
@@ -78,7 +86,6 @@ class IntCode:
     def decode(self):
         decoded_opcode = self.memory[self.i] % 100
         mode = self.memory[self.i] // 100
-
         return decoded_opcode, mode 
 
     def get_mode(self, param_index): 
@@ -111,6 +118,8 @@ class IntCode:
             # print(f"elif self.rel_base: {self.relative_base}")
             # print(f"elif value : {value}")
             return self.relative_base + value
+        elif param_mode == 1:
+            raise Exception("write param in immediate mode")
 
 
     def jump_true(self):

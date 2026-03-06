@@ -22,7 +22,7 @@ class IntCode:
             self.memory[address] = value
         self.i = i
         self.mode = mode
-        self.inputs = inputs
+        self.inputs = list(inputs)
         self.result = None
         self.relative_base = 0
         self.extended = []
@@ -35,14 +35,14 @@ class IntCode:
             if opcode == 99:
                 self.halted = True
                 return None
+            if opcode == 3:
+                if not self.inputs:
+                    return None
             
             self.i = OPCODES[opcode](self)
             if opcode == 4:
                 return self.result
             
-            if opcode == 3:
-                if not self.inputs:
-                    return None
 
 
     
@@ -73,10 +73,7 @@ class IntCode:
         
     def op_input(self):
         # print("OPCODE 3 CALLED")
-        if not self.inputs:
-            self.memory[self.write_addr(1)] = -1
-        else:
-            self.memory[self.write_addr(1)] = self.inputs.pop(0)
+        self.memory[self.write_addr(1)] = self.inputs.pop(0)
         return self.i + 2
         
     def output(self):
